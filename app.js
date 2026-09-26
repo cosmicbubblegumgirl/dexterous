@@ -1165,7 +1165,6 @@ function raidModal() {
 }
 
 let importRows = [];
-let importRows = [];
 function parseCsv(text) {
   const rows = [];
   let row = [],
