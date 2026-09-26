@@ -1,48 +1,72 @@
 # Dexterous
 
-A Pokémon field guide for curious collectors, by Quantum Cupcake Creations.
+Dexterous is a playful Pokémon field guide and trainer toolkit by Quantum Cupcake Creations.
 
-## Frontend
+It combines a National Pokédex browser with personal collection tracking, Pokémon GO companion tools, team planning, battle and raid sandboxes, event reminders, field notes, and cloud sync.
 
-Static ES modules, responsive CSS, a bundled species catalog, browser IndexedDB for guest records, and a service worker for previously loaded entries and assets. Publish the repository root with GitHub Pages. No frontend build is required.
+## What is inside
 
-Core tools include the complete 1,025-entry National Pokédex snapshot (Kanto through Paldea), regional and type filtering, collection flags and notes, shiny previews, evolution families and conditions, team coverage, comparison tables, GO CSV imports, wishlists, share links, goals, a field journal, calendar exports, quizzes, theme and accessibility controls, and portable backups.
+- National Pokédex browsing with region, type, rarity, search, and sorting controls
+- Collection tracking for caught, seen, shiny, lucky, favourites, wishlists, trades, notes, nicknames, dates, locations, and quantities
+- Pokémon GO CSV import plus a bulk box builder for adding several species at once
+- Team Builder with shared weakness checks and type coverage
+- 1v1 Battle Lab for lightweight base-stat and type-matchup comparisons
+- Raid Lab for counter-type planning and team-readiness checks
+- Official-event cards with local dates, source links, and calendar reminders
+- Evolution families and condition notes
+- Trainer profile, themes, display controls, badges, journal entries, goals, quizzes, backups, and collection sharing
+- Offline-friendly shell and local guest storage
+- Account signup, login, recovery, and cross-device collection sync
 
-## Backend
+## Project structure
 
-`npm install` then `npm start` runs the local server on port 4173 with SQLite. Account passwords use salted scrypt; sessions store only token hashes in the database. Account recovery uses a one-time recovery code; no verification or recovery email service is configured. Guest records are separate from cloud accounts.
+The frontend is plain HTML, CSS, and JavaScript modules. There is no frontend framework or bundler required for day-to-day development.
 
-### Deploy the app and backend to Vercel
+Key files:
 
-Import this repository into Vercel with the repository root as the project root. The Vercel build script copies only frontend files into `dist`; `api/[...path].mjs` is deployed separately as a serverless function. Connect a Neon PostgreSQL database for Production, Preview, and Development. The backend accepts `DATABASE_URL`, `POSTGRES_URL`, and the Vercel Neon integration's prefixed `yuvertel_DATABASE_URL` or `yuvertel_POSTGRES_URL`. Vercel's `VERCEL_URL` and `VERCEL_PROJECT_PRODUCTION_URL` values are automatically allowed as same-origin hosts, so the app uses its Vercel origin for `/api` without a frontend build-time URL.
+- `index.html` — app shell
+- `app.js` — interface and feature behaviour
+- `style.css` — responsive visual system
+- `lib/data.js` — Pokédex helpers and type-matchup utilities
+- `lib/store.js` — local storage, account sessions, and cloud sync
+- `data/catalog.json` — bundled Pokédex snapshot
+- `sw.js` — offline cache
+- `scripts/catalog.py` — catalog rebuild utility
 
-After logging into Vercel, linking the project, and connecting Neon, deploy with:
+## Cloud accounts
+
+Production accounts use Supabase Auth and a row-level-secured `dexterous_field_guides` table.
+
+The browser only receives the public Supabase project URL and publishable key. User collection rows are protected by database policies tied to the signed-in user ID.
+
+Guest collections stay in IndexedDB on the current device until the user signs in or exports a backup.
+
+## Running locally
+
+Install the project dependencies:
 
 ```sh
-npm.cmd exec --yes --package=vercel -- vercel login
-npm.cmd exec --yes --package=vercel -- vercel link
-npm.cmd exec --yes --package=vercel -- vercel env add DATABASE_URL production
-npm.cmd exec --yes --package=vercel -- vercel env add DATABASE_URL preview
-npm.cmd exec --yes --package=vercel -- vercel env add DATABASE_URL development
-npm.cmd exec --yes --package=vercel -- vercel --prod
+npm install
 ```
 
-Enter the Neon connection string at the CLI prompt; never commit it. Redeploy after changing environment variables. The production deployment URL serves both the frontend and account API.
+Start the local app:
 
-For a separately hosted frontend, configure:
+```sh
+npm start
+```
 
-- `DATABASE_URL`: the server-only Neon database connection string.
-- `ALLOWED_ORIGINS`: the exact frontend origin, such as `https://cosmicbubblegumgirl.github.io`.
-Set `apiBase` in `config.js` to the deployed backend origin for that separate frontend. Never commit keys or database connection strings. The production backend does not fall back to an ephemeral local database. Database tables are created on first connection.
+The production site is deployed from the `main` branch through Vercel.
 
-Until the backend is activated, the live Pages app clearly labels guest storage. Sign-up/login/recovery and cross-device storage are implemented but must be validated against the hosted service after provisioning.
+## Pokémon GO companion
 
-`node scripts/check-backend.mjs` checks local account separation, login, session invalidation, storage revisions, origin checks and account recovery against an isolated temporary database.
+Dexterous does not request Pokémon GO credentials or access a live Pokémon GO inventory.
 
-## Pokémon GO
+GO collection data is entered by the user through the bulk picker or CSV import. Event cards link back to official Pokémon GO pages so changing event details can be checked at the source.
 
-This is a manual companion, not an authorised GO account connector. CSV imports are reviewed by the user. It does not request Pokémon GO credentials, automate play, or access live inventories. Main-series stats are labelled separately from GO tracking.
+Battle and raid tools are planning sandboxes. They use the data available inside Dexterous and are not exact replacements for live-game damage or raid calculations.
 
 ## Data and artwork
 
-Species data and artwork are from [PokéAPI](https://pokeapi.co) and its public [data repository](https://github.com/PokeAPI/pokeapi) and [sprites repository](https://github.com/PokeAPI/sprites). Pokémon and character artwork belong to their respective owners. This is an independent fan project. Cached API entries are refreshed after seven days. The bundled catalog is a snapshot and can be rebuilt using `scripts/catalog.py`.
+Pokédex data and artwork are sourced from PokéAPI and its public data and sprite repositories.
+
+Pokémon names, characters, and artwork belong to their respective rights holders. Dexterous is an independent fan project.
