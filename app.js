@@ -1440,7 +1440,9 @@ async function boot() {
     route = location.hash.slice(1) || "discover";
     if (!navs.some((n) => n[0] === route)) route = "discover";
     shell();
-    const shared = new URLSearchParams(location.search).get("s");
+    const params = new URLSearchParams(location.search);
+    if (params.get("signup") === "1") authModal("signup");
+    const shared = params.get("s");
     if (shared && shared.length < 20000) {
       try {
         const d = JSON.parse(decodeURIComponent(escape(atob(shared))));
