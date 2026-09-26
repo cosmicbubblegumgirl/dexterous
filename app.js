@@ -663,11 +663,61 @@ function typeChart() {
 }
 function authModal(mode = "login") {
   detailId = null;
+  const headingText =
+    mode === "signup"
+      ? "Join the field club."
+      : mode === "recover"
+        ? "Reset your password."
+        : "Welcome back, trainer.";
+  let form = "";
+  if (mode === "signup") {
+    form =
+      '<form id="auth-form" class="stack" data-mode="signup">' +
+      '<label>Trainer name<input name="name" maxlength="50" required autocomplete="nickname"></label>' +
+      '<label>Email<input type="email" name="email" required autocomplete="email" maxlength="254"></label>' +
+      '<label>Password<input type="password" name="password" required minlength="12" maxlength="128" autocomplete="new-password"></label>' +
+      '<p class="small muted">Use at least 12 characters. If email confirmation is enabled, check your inbox before your first login.</p>' +
+      '<p class="error" id="auth-error" role="alert"></p>' +
+      '<button class="btn primary">Create account</button>' +
+      '<div class="row">' +
+      button("Back to login", "auth-login") +
+      "</div></form>";
+  } else if (mode === "recover") {
+    form =
+      '<form id="auth-form" class="stack" data-mode="recover">' +
+      '<label>Email<input type="email" name="email" required autocomplete="email" maxlength="254"></label>' +
+      '<p class="small muted">We will send a secure password-reset email to this address.</p>' +
+      '<p class="error" id="auth-error" role="alert"></p>' +
+      '<button class="btn primary">Send reset email</button>' +
+      '<div class="row">' +
+      button("Back to login", "auth-login") +
+      "</div></form>";
+  } else {
+    form =
+      '<form id="auth-form" class="stack" data-mode="login">' +
+      '<label>Email<input type="email" name="email" required autocomplete="email" maxlength="254"></label>' +
+      '<label>Password<input type="password" name="password" required minlength="12" maxlength="128" autocomplete="current-password"></label>' +
+      '<p class="error" id="auth-error" role="alert"></p>' +
+      '<button class="btn primary">Log in</button>' +
+      '<div class="row">' +
+      button("Create an account", "auth-signup") +
+      button("Forgot password?", "auth-recover") +
+      "</div></form>";
+  }
   modal(
-    `<div class="modal-header"><h2>${mode === "signup" ? "Join the field club." : mode === "recover" ? "Find your way back." : "Welcome back, trainer."}</h2></div>${!store.backend ? `<div class="note"><strong>Cloud accounts need one more setup step.</strong><p class="space">The backend has not been activated yet. You can explore, save a guest collection, and export a backup now.</p></div><div class="row space">${button("Keep exploring", "close", true)}${button("Export my collection", "export")}</div>` : `<form id="auth-form" class="stack" data-mode="${mode}">${mode === "signup" ? '<label>Trainer name<input name="name" maxlength="50" required autocomplete="nickname"></label>' : ""}<label>Email<input type="email" name="email" required autocomplete="email" maxlength="254"></label>${mode === "recover" ? '<label>Recovery code<input name="recoveryCode" required autocomplete="off"></label>' : ""}<label>${mode === "recover" ? "New password" : "Password"}<input type="password" name="password" required minlength="12" maxlength="128" autocomplete="${mode === "login" ? "current-password" : "new-password"}"></label>${mode !== "login" ? '<p class="small muted">Use at least 12 characters. Keep your recovery code somewhere safe; it is how you recover your account.</p>' : ""}<p class="error" id="auth-error" role="alert"></p><button class="btn primary">${mode === "signup" ? "Create account" : mode === "recover" ? "Reset password" : "Log in"}</button><div class="row">${button(mode === "login" ? "Create an account" : "Back to login", mode === "login" ? "auth-signup" : "auth-login")}${mode === "login" ? button("Use recovery code", "auth-recover") : ""}</div></form>`}`,
+    '<div class="modal-header"><h2>' +
+      headingText +
+      "</h2></div>" +
+      (!store.backend
+        ? '<div class="note"><strong>Cloud accounts are temporarily unavailable.</strong><p class="space">Your guest collection still saves safely on this device.</p></div><div class="row space">' +
+          button("Keep exploring", "close", true) +
+          button("Export my collection", "export") +
+          "</div>"
+        : form),
     true,
   );
 }
+
 function shareModal(kind = "collection") {
   const ids =
     kind === "trades"
@@ -1359,14 +1409,35 @@ document.addEventListener("submit", async (ev) => {
       btn.textContent = "One moment…";
       try {
         const r = await authenticate(form.dataset.mode, values);
-        closeModal();
-        shell();
-        if (r.recoveryCode)
+        if (r.confirmationRequired) {
+          closeModal();
           modal(
-            `<div class="modal-header"><h2>Keep this recovery code safe.</h2></div><p class="muted">This is your only account recovery method. Store it somewhere private. It is shown once.</p><p class="note space" style="font-family:monospace;word-break:break-all">${esc(r.recoveryCode)}</p><p class="small muted space">Your guest collection is still saved separately on this device. Export it before importing it into this account.</p>${button("I saved my recovery code", "close", true)}`,
+            '<div class="modal-header"><h2>Check your email.</h2></div>' +
+              '<p class="muted">Your cloud account was created. Open the confirmation email sent to <strong>' +
+              esc(r.user.email) +
+              '</strong>, confirm it, then return here and log in.</p><div class="row space">' +
+              button("Got it", "close", true) +
+              "</div>",
             true,
           );
-        else toast("Welcome back, trainer.");
+          return;
+        }
+        if (r.resetRequested) {
+          closeModal();
+          modal(
+            '<div class="modal-header"><h2>Reset email sent.</h2></div>' +
+              '<p class="muted">Check <strong>' +
+              esc(r.user.email) +
+              '</strong> for the password-reset message.</p><div class="row space">' +
+              button("Got it", "close", true) +
+              "</div>",
+            true,
+          );
+          return;
+        }
+        closeModal();
+        shell();
+        toast("Welcome back, trainer.");
       } catch (e) {
         $("#auth-error").textContent = e.message;
         btn.disabled = false;
