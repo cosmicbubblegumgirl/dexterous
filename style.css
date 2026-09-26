@@ -1841,3 +1841,287 @@ body.modal-open {
     top: 0;
   }
 }
+
+
+/* GO bulk box, event radar, and simulator additions */
+.event-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.event-card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--raised);
+  padding: 18px;
+}
+.event-card h3 {
+  margin-top: 10px;
+}
+.event-card > p {
+  line-height: 1.55;
+}
+.event-status {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.event-status.live {
+  background: var(--soft);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+}
+.event-status.soon {
+  background: var(--panel);
+  color: var(--text);
+}
+.event-status.ended {
+  opacity: 0.58;
+}
+
+.bulk-list {
+  display: grid;
+  gap: 8px;
+  max-height: 54dvh;
+  overflow: auto;
+  padding-right: 4px;
+}
+.bulk-row {
+  display: grid;
+  grid-template-columns: 28px 58px minmax(160px, 1fr) auto auto 82px;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 13px;
+  padding: 10px 12px;
+}
+.bulk-row.selected {
+  background: var(--soft);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+}
+.bulk-row > img {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+}
+.bulk-name {
+  min-width: 0;
+}
+.bulk-name strong,
+.bulk-name span {
+  display: block;
+}
+.bulk-name span {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bulk-flag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+.bulk-count {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.bulk-count input {
+  width: 68px;
+  margin-top: 3px;
+  padding: 8px;
+}
+.sticky-actions {
+  position: sticky;
+  bottom: -32px;
+  z-index: 3;
+  margin: 18px -19px -32px;
+  padding: 14px 19px max(18px, env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sim-panel {
+  position: relative;
+  overflow: hidden;
+}
+.sim-panel::after {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  right: -55px;
+  bottom: -70px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  pointer-events: none;
+}
+.versus-grid {
+  display: grid;
+  grid-template-columns: 1fr 70px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+.versus-mark {
+  text-align: center;
+  font-family: Manrope, sans-serif;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+.sim-pick {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--raised);
+  border-radius: 17px;
+  padding: 16px;
+  color: var(--text);
+  text-align: center;
+}
+.sim-pick:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+}
+.sim-pick img {
+  display: block;
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  margin: auto;
+}
+.sim-pick span,
+.sim-pick small {
+  display: block;
+}
+.sim-pick span {
+  font-weight: 700;
+}
+.sim-pick small {
+  color: var(--muted);
+  margin-top: 4px;
+}
+.sim-result {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 16px;
+  padding: 18px;
+  margin-top: 18px;
+}
+.battle-hp {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.battle-hp span {
+  font-size: 0.78rem;
+}
+.battle-log {
+  display: grid;
+  gap: 6px;
+  margin-top: 16px;
+}
+.battle-log p {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.raid-boss {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.8fr) 1.2fr;
+  align-items: center;
+  gap: 20px;
+}
+.raid-meter {
+  height: 10px;
+}
+
+@media (max-width: 900px) {
+  .event-grid {
+    grid-template-columns: 1fr;
+  }
+  .bulk-row {
+    grid-template-columns: 28px 52px minmax(120px, 1fr) auto auto;
+  }
+  .bulk-count {
+    grid-column: 3 / -1;
+  }
+}
+@media (max-width: 650px) {
+  .event-card .row {
+    align-items: flex-start;
+  }
+  .event-card .btn {
+    flex: 1;
+    justify-content: center;
+  }
+  .bulk-list {
+    max-height: 57dvh;
+  }
+  .bulk-row {
+    grid-template-columns: 24px 46px minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 9px;
+  }
+  .bulk-row > img {
+    width: 44px;
+    height: 44px;
+  }
+  .bulk-name span {
+    white-space: normal;
+  }
+  .bulk-flag {
+    grid-column: auto;
+    font-size: 0.72rem;
+  }
+  .bulk-count {
+    grid-column: 3 / -1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bulk-count input {
+    width: 74px;
+    margin: 0;
+  }
+  .sticky-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .sticky-actions .row {
+    width: 100%;
+  }
+  .sticky-actions .btn {
+    flex: 1;
+  }
+  .versus-grid {
+    grid-template-columns: 1fr 42px 1fr;
+    gap: 7px;
+  }
+  .sim-pick {
+    padding: 10px;
+  }
+  .sim-pick img {
+    width: 88px;
+    height: 88px;
+  }
+  .battle-hp {
+    grid-template-columns: 1fr;
+  }
+  .raid-boss {
+    grid-template-columns: 1fr;
+  }
+}
