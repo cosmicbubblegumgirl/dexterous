@@ -75,7 +75,7 @@ let catalog = [],
   shiny = false,
   compares = [],
   quiz = null,
-  installPrompt,
+  installOffer,
   bulkSelected = new Map(),
   bulkQuery = "",
   bulkGen = "",
@@ -275,7 +275,7 @@ function badges() {
 function shell() {
   const name = store.data.profile.name || "Trainer";
   $("#app").innerHTML =
-    `${!navigator.onLine ? '<div class="offline">Offline · your saved field guide is still here</div>' : ""}<div class="shell"><aside class="sidebar"><a href="#discover" class="brand"><img src="assets/logo.png" alt="Dexterous logo"><div>dexterous<small>THE CURIOUS FIELD GUIDE</small></div></a><nav aria-label="Main navigation">${navs.map(([id, i, label]) => `<a href="#${id}" class="nav ${route === id ? "active" : ""}" ${route === id ? 'aria-current="page"' : ""}>${icon(i)}<span>${label}</span>${id === "collection" ? `<span class="count">${catchEntries().length}</span>` : ""}</a>`).join("")}</nav><div class="sidebar-bottom"><div class="aside-note"><strong>A little help from Dexter.</strong><p>Types, evolutions, and your next small adventure.</p><button data-action="chat" class="btn subtle">Ask Dexter ${icon("arrow")}</button></div><div class="credit">A Quantum Cupcake Creation<br>A little more discovery.</div></div></aside><div class="workspace"><header class="topbar"><div class="breadcrumb">Field guide <span>/ &nbsp; ${navs.find((n) => n[0] === route)?.[2] || "Discover"}</span></div><a href="#discover" class="mobile-brand brand"><img src="assets/logo.png" alt=""><div>dexterous<small>STAY CURIOUS.</small></div></a><div class="row"><button class="iconbtn" data-action="theme" aria-label="Toggle light and dark theme">${icon("sun")}</button><button class="account" data-action="account"><span class="avatar">${esc(name[0].toUpperCase())}</span><div>${esc(name)}<div class="status" id="save-status">${esc(store.status)}</div></div>${icon("chevron")}</button></div></header><main id="main" tabindex="-1"></main></div></div><nav class="mobile-nav" aria-label="Mobile navigation">${[navs[0], navs[1], navs[2], navs[3], navs[5]].map(([id, i, label]) => `<a href="#${id}" class="${route === id ? "active" : ""}" ${route === id ? 'aria-current="page"' : ""}>${icon(i)}${{ discover: "Discover", collection: "Collection", team: "Team", go: "GO", lab: "More" }[id]}</a>`).join("")}</nav><button class="assistant-toggle" data-action="chat" aria-label="Open Dexter assistant"><img src="assets/icon.svg" alt="">Dexter ${icon("spark")}</button>`;
+    `${!navigator.onLine ? '<div class="offline">Offline · your saved field guide is still here</div>' : ""}<div class="shell"><aside class="sidebar"><a href="#discover" class="brand"><img src="assets/logo.png" alt="Dexterous logo"><div>dexterous<small>THE CURIOUS FIELD GUIDE</small></div></a><nav aria-label="Main navigation">${navs.map(([id, i, label]) => `<a href="#${id}" class="nav ${route === id ? "active" : ""}" ${route === id ? 'aria-current="page"' : ""}>${icon(i)}<span>${label}</span>${id === "collection" ? `<span class="count">${catchEntries().length}</span>` : ""}</a>`).join("")}</nav><div class="sidebar-bottom"><div class="aside-note"><strong>A little help from Dexter.</strong><p>Types, evolutions, and your next small adventure.</p><button data-action="dexter-guide" class="btn subtle">Open Dexter guide ${icon("arrow")}</button></div><div class="credit">A Quantum Cupcake Creation<br>A little more discovery.</div></div></aside><div class="workspace"><header class="topbar"><div class="breadcrumb">Field guide <span>/ &nbsp; ${navs.find((n) => n[0] === route)?.[2] || "Discover"}</span></div><a href="#discover" class="mobile-brand brand"><img src="assets/logo.png" alt=""><div>dexterous<small>STAY CURIOUS.</small></div></a><div class="row"><button class="iconbtn" data-action="theme" aria-label="Toggle light and dark theme">${icon("sun")}</button><button class="account" data-action="account"><span class="avatar">${esc(name[0].toUpperCase())}</span><div>${esc(name)}<div class="status" id="save-status">${esc(store.status)}</div></div>${icon("chevron")}</button></div></header><main id="main" tabindex="-1"></main></div></div><nav class="mobile-nav" aria-label="Mobile navigation">${[navs[0], navs[1], navs[2], navs[3], navs[5]].map(([id, i, label]) => `<a href="#${id}" class="${route === id ? "active" : ""}" ${route === id ? 'aria-current="page"' : ""}>${icon(i)}${{ discover: "Discover", collection: "Collection", team: "Team", go: "GO", lab: "More" }[id]}</a>`).join("")}</nav><button class="dexter-toggle" data-action="dexter-guide" aria-label="Open Dexter field guide"><img src="assets/icon.svg" alt="">Dexter ${icon("spark")}</button>`;
   renderView();
   prefs();
   const asideNote = document.querySelector(".aside-note");
@@ -634,7 +634,7 @@ function settingsView() {
     : "Cloud storage is unavailable right now. Your guest collection remains saved on this device.";
   $("#main").innerHTML =
     heading("MAKE YOURSELF AT HOME", "Your trainer space.", "A field guide that feels like yours.") +
-    `<div class="grid2"><section class="panel"><h2>Trainer card</h2><form id="profile-form" class="stack space"><label>Trainer name<input name="name" value="${esc(profile.name)}" maxlength="50" required></label><label>A little about you<textarea name="bio" maxlength="200">${esc(profile.bio)}</textarea></label><label>GO friend code (optional)<input name="friendCode" inputmode="numeric" placeholder="0000 0000 0000" value="${esc(profile.friendCode)}" maxlength="20"></label><label>Team colour<select name="team">${teamOptions.map((team) => `<option ${team === profile.team ? "selected" : ""}>${team}</option>`).join("")}</select></label><button class="btn primary">Save trainer card</button></form></section><section class="panel"><h2>Comfort settings</h2><div class="stack space"><label>Field guide palette<select id="pref-theme">${paletteOptions.map(([value, label]) => `<option value="${value}" ${preferences.theme === value ? "selected" : ""}>${label}</option>`).join("")}</select></label><div><span class="setting-label">Display mode</span><div class="mode-toggle" role="group" aria-label="Display mode"><button type="button" class="btn ${preferences.mode !== "dark" ? "primary" : ""}" data-action="mode" data-value="light" aria-pressed="${preferences.mode !== "dark"}">Light</button><button type="button" class="btn ${preferences.mode === "dark" ? "primary" : ""}" data-action="mode" data-value="dark" aria-pressed="${preferences.mode === "dark"}">Dark</button></div></div><label class="check"><input type="checkbox" id="pref-blue-light" ${preferences.blueLight ? "checked" : ""}>Blue-light filter</label><label>Text size<select id="pref-font"><option value="normal" ${preferences.font !== "large" ? "selected" : ""}>Comfortable</option><option value="large" ${preferences.font === "large" ? "selected" : ""}>Larger</option></select></label><label class="check"><input type="checkbox" id="pref-motion" ${preferences.motion ? "checked" : ""}>Gentle animations</label><div class="divider"></div><h3>Account &amp; storage</h3><p class="small muted">${accountCopy}</p><p class="note">${cloudNote}</p>${button(store.session ? "Sign out" : "Log in / Sign up", store.session ? "logout" : "auth", true)}<div class="row">${button("Export backup", "export", false, "download")}${button("Import backup", "import", false, "upload")}${installPrompt ? button("Install app", "install") : ""}</div></div></section></div>`;
+    `<div class="grid2"><section class="panel"><h2>Trainer card</h2><form id="profile-form" class="stack space"><label>Trainer name<input name="name" value="${esc(profile.name)}" maxlength="50" required></label><label>A little about you<textarea name="bio" maxlength="200">${esc(profile.bio)}</textarea></label><label>GO friend code (optional)<input name="friendCode" inputmode="numeric" placeholder="0000 0000 0000" value="${esc(profile.friendCode)}" maxlength="20"></label><label>Team colour<select name="team">${teamOptions.map((team) => `<option ${team === profile.team ? "selected" : ""}>${team}</option>`).join("")}</select></label><button class="btn primary">Save trainer card</button></form></section><section class="panel"><h2>Comfort settings</h2><div class="stack space"><label>Field guide palette<select id="pref-theme">${paletteOptions.map(([value, label]) => `<option value="${value}" ${preferences.theme === value ? "selected" : ""}>${label}</option>`).join("")}</select></label><div><span class="setting-label">Display mode</span><div class="mode-toggle" role="group" aria-label="Display mode"><button type="button" class="btn ${preferences.mode !== "dark" ? "primary" : ""}" data-action="mode" data-value="light" aria-pressed="${preferences.mode !== "dark"}">Light</button><button type="button" class="btn ${preferences.mode === "dark" ? "primary" : ""}" data-action="mode" data-value="dark" aria-pressed="${preferences.mode === "dark"}">Dark</button></div></div><label class="check"><input type="checkbox" id="pref-blue-light" ${preferences.blueLight ? "checked" : ""}>Blue-light filter</label><label>Text size<select id="pref-font"><option value="normal" ${preferences.font !== "large" ? "selected" : ""}>Comfortable</option><option value="large" ${preferences.font === "large" ? "selected" : ""}>Larger</option></select></label><label class="check"><input type="checkbox" id="pref-motion" ${preferences.motion ? "checked" : ""}>Gentle animations</label><div class="divider"></div><h3>Account &amp; storage</h3><p class="small muted">${accountCopy}</p><p class="note">${cloudNote}</p>${button(store.session ? "Sign out" : "Log in / Sign up", store.session ? "logout" : "auth", true)}<div class="row">${button("Export backup", "export", false, "download")}${button("Import backup", "import", false, "upload")}${installOffer ? button("Install app", "install") : ""}</div></div></section></div>`;
 }
 function renderView() {
   const view = ({
@@ -1109,7 +1109,7 @@ function battleModal() {
     : "The sandbox calls it even";
   modal(
     `<div class="modal-header"><div><div class="eyebrow">BATTLE LAB</div><h2>1v1 sandbox</h2></div></div>
-    <p class="note"><strong>Strategy sandbox, not a battle oracle.</strong> This uses main-series base stats, Speed and type effectiveness only. Moves, levels, IVs, abilities, shields, energy, weather and Pokémon GO battle tuning are not modelled.</p>
+    <p class="note"><strong>Strategy sandbox, not a battle oracle.</strong> This uses main-series base stats, Speed and type effectiveness only. Moves, levels, IVs, abilities, shields, energy, weather and Pokémon GO battle tuning are not included.</p>
     <div class="versus-grid space">
       <button class="sim-pick" data-action="battle-choose-a"><img src="${artwork(a.id)}" alt=""><span>${title(a.name)}</span><small>${a.types.map(title).join(" / ")}</small></button>
       <div class="versus-mark">VS</div>
@@ -1192,7 +1192,6 @@ function parseCsv(text) {
   if (row.some(Boolean)) rows.push(row);
   return rows;
 }
-function unusedRenderChatRemoved() {}
 function guideAnswer(q) {
   const s = q.toLowerCase();
   const matched = catalog
@@ -1201,9 +1200,9 @@ function guideAnswer(q) {
     )
     .sort((a, b) => b.name.length - a.name.length)[0];
   if (/team/.test(s)) {
-    const ps = store.data.team.map((id) => byId.get(id));
+    const ps = store.data.team.map((id) => byId.get(id)).filter(Boolean);
     if (!ps.length)
-      return "Your team is still empty. Open Team builder and choose up to six Pokémon. I can then explain the weaknesses they share.";
+      return "Your team is still empty. Open Team builder and choose up to six Pokémon. Dexter can then flag shared type weaknesses.";
     const risks = types
       .map((t) => ({
         t,
@@ -1214,7 +1213,11 @@ function guideAnswer(q) {
   }
   if (/next|goal|mission|today/.test(s)) return nextMission();
   if (/go|sync|connect/.test(s) && !matched)
-    return "GO companion is your personal tracker. Add catches manually or import a CSV, plan buddy goals, and share trade lists. There is no live connection to your Pokémon GO account. GO to HOME transfers happen in the official apps and are one-way.";
+    return "GO companion is your personal tracker. Add catches with the bulk picker or CSV importer, plan buddy goals, review events, and share trade lists. Dexterous does not sign into your Pokémon GO account.";
+  if (/raid/.test(s) && !matched)
+    return "Open The lab → Raid Lab. Pick a boss, raid tier, trainer count, and use your Team Builder squad to get a type-and-base-stat readiness index.";
+  if (/battle|versus|1v1/.test(s) && !matched)
+    return "Open The lab → Battle Lab for a lightweight 1v1 sandbox based on base stats, Speed, and type matchups.";
   if (matched) {
     const p = matched;
     if (/evol/.test(s)) {
@@ -1222,41 +1225,33 @@ function guideAnswer(q) {
       return `${title(p.name)} belongs to this evolution family: ${f.map((x) => title(x.name)).join(", ")}.\n\nOpen ${title(p.name)} → Evolutions for the family and live evolution conditions. GO requirements can differ from the main games.`;
     }
     if (/nick|name/.test(s))
-      return `Three names for ${title(p.name)}: ${Array.from({ length: 3 }, () => nickname(p)).join(", ")}. A tiny menace deserves a good title.`;
+      return `Three names for ${title(p.name)}: ${Array.from({ length: 3 }, () => nickname(p)).join(", ")}.`;
     const w = weaknesses(p);
-    return `${title(p.name)} is ${p.types.map(title).join(" / ")} type.\n\nWeak to: ${w.map((x) => `${title(x.type)} (×${x.m})`).join(", ")}.\n\nBase stats: HP ${p.stats[0]}, Attack ${p.stats[1]}, Defense ${p.stats[2]}, Sp. Atk ${p.stats[3]}, Sp. Def ${p.stats[4]}, Speed ${p.stats[5]}.\n\n${entry(p.id).caught ? "Already in your collection. Excellent taste." : "You have not marked this species as caught yet."}`;
+    return `${title(p.name)} is ${p.types.map(title).join(" / ")} type.\n\nWeak to: ${w.map((x) => `${title(x.type)} (×${x.m})`).join(", ")}.\n\nBase stats: HP ${p.stats[0]}, Attack ${p.stats[1]}, Defense ${p.stats[2]}, Sp. Atk ${p.stats[3]}, Sp. Def ${p.stats[4]}, Speed ${p.stats[5]}.\n\n${entry(p.id).caught ? "Already in your collection." : "You have not marked this species as caught yet."}`;
   }
   const t = types.find((t) => s.includes(t));
   if (t) {
     const strong = types.filter((d) => multiplier(t, [d]) === 2);
     const immune = types.filter((d) => multiplier(t, [d]) === 0);
-    return `${title(t)} attacks are super effective against ${strong.map(title).join(", ") || "no single types"}.${immune.length ? " They do no damage to " + immune.map(title).join(", ") + "." : ""}\n\nFor a Pokémon with two types, multiply both matchups. Use the Type chart in The lab for the full table.`;
+    return `${title(t)} attacks are super effective against ${strong.map(title).join(", ") || "no single types"}.${immune.length ? " They do no damage to " + immune.map(title).join(", ") + "." : ""}\n\nFor a dual-type Pokémon, multiply both matchups. Use the Type chart in The lab for the full table.`;
   }
-  return "In field guide mode I can look up Pokémon, explain type weaknesses, show evolution families, suggest nicknames, review your team, and suggest a next goal. Try a Pokémon name, “Review my team”, or “What next?”.";
+  return "Dexter can look up Pokémon, explain type weaknesses, show evolution families, review your team, point you toward the GO tools, and suggest a next goal.";
 }
-async function chatSend(q) {
-  if (chatBusy || !q.trim()) return;
-  chatHistory.push({ role: "user", content: q.trim() });
-  chatBusy = true;
-  renderChat();
-  let answer;
-  try {
-    if (store.assistant && store.session) {
-      const r = await request("/api/dexter", {
-        messages: chatHistory.slice(-10),
-        team: store.data.team,
-        question: q,
-      });
-      answer = r.answer;
-    } else answer = guideAnswer(q);
-  } catch {
-    answer =
-      "The conversation service is unavailable, so here is a field-guide answer:\n\n" +
-      guideAnswer(q);
-  }
-  chatHistory.push({ role: "assistant", content: answer });
-  chatBusy = false;
-  renderChat();
+function dexterGuide(answer = "") {
+  modal(
+    `<div class="modal-header"><div><div class="eyebrow">DEXTER'S FIELD NOTES</div><h2>Quick field guide</h2></div></div>
+    <p class="muted small">A local reference tool built from the Pokédex data already in Dexterous.</p>
+    <form id="dexter-form" class="row space">
+      <input name="query" maxlength="100" placeholder="Try Pikachu, Review my team, raids…" aria-label="Dexter lookup" required>
+      <button class="btn primary">Look it up</button>
+    </form>
+    <div class="row space">
+      <button class="btn" data-action="dexter-topic" data-value="Review my team">Review my team</button>
+      <button class="btn" data-action="dexter-topic" data-value="What next?">What next?</button>
+      <button class="btn" data-action="dexter-topic" data-value="Raid">Raid tools</button>
+    </div>
+    ${answer ? `<div class="field-note space"><strong>Dexter's note</strong><p>${esc(answer).replaceAll("\n", "<br>")}</p></div>` : ""}`,
+  );
 }
 document.addEventListener("click", async (ev) => {
   const el = ev.target.closest("[data-action]");
@@ -1347,6 +1342,12 @@ document.addEventListener("click", async (ev) => {
         break;
       case "account":
         navigate("settings");
+        break;
+      case "dexter-guide":
+        dexterGuide();
+        break;
+      case "dexter-topic":
+        dexterGuide(guideAnswer(v || ""));
         break;
       case "theme":
         store.data.preferences.mode =
@@ -1660,9 +1661,9 @@ document.addEventListener("click", async (ev) => {
         toast("Signed out. Your guest guide is ready.");
         break;
       case "install":
-        if (installPrompt) {
-          await installPrompt.prompt();
-          installPrompt = null;
+        if (installOffer) {
+          await installOffer.prompt();
+          installOffer = null;
         }
         break;
     }
@@ -1837,6 +1838,9 @@ document.addEventListener("submit", async (ev) => {
   ev.preventDefault();
   const values = Object.fromEntries(new FormData(form));
   try {
+    if (form.id === "dexter-form") {
+      dexterGuide(guideAnswer(String(values.query || "")));
+    }
     if (form.id === "notes-form") {
       const id = +form.dataset.id;
       store.data.collection[id] = {
@@ -1989,7 +1993,7 @@ window.addEventListener("dex-status", () => {
 });
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
-  installPrompt = e;
+  installOffer = e;
 });
 window.addEventListener("online", () =>
   toast("Back online. More discoveries await."),
