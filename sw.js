@@ -1,4 +1,4 @@
-const VERSION = "dexterous-v4";
+const VERSION = "dexterous-v6";
 const SHELL = [
   "./",
   "./index.html",
