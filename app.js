@@ -75,7 +75,144 @@ let catalog = [],
   shiny = false,
   compares = [],
   quiz = null,
-  installPrompt;
+  installPrompt,
+  bulkSelected = new Map(),
+  bulkQuery = "",
+  bulkGen = "",
+  battleState = { a: 25, b: 6 },
+  raidState = { boss: 150, tier: "5", players: 1 };
+
+const goEvents = [
+  {
+    id: "phantump-mastery",
+    title: "Phantump Catch Mastery",
+    kind: "Catch Mastery",
+    start: "2026-09-26T10:00:00",
+    end: "2026-09-26T20:00:00",
+    summary: "Phantump headlines research with boosted Shiny odds, plus bonus XP and Candy for Nice Throws or better.",
+    spotlight: "Phantump · Cherubi · Drifloon",
+    url: "https://pokemongo.com/en/news/catch-mastery-phantump-2026",
+  },
+  {
+    id: "go-pass-september",
+    title: "GO Pass: September",
+    kind: "GO Pass",
+    start: "2026-09-08T10:00:00",
+    end: "2026-10-06T10:00:00",
+    summary: "Earn GO Points through the September pass, with Latios among the featured rewards.",
+    spotlight: "Latios · Rare Candy XL · Premium Battle Pass",
+    url: "https://pokemongo.com/news/go-pass-september-2026?hl=eng",
+  },
+  {
+    id: "harvest-applin",
+    title: "Harvest Festival: Applin Picking",
+    kind: "Seasonal event",
+    start: "2026-09-29T10:00:00",
+    end: "2026-10-05T20:00:00",
+    summary: "Shiny Applin debuts, with apple-focused Mossy Lures and event bonuses.",
+    spotlight: "Applin · Smoliv · Mossy Lures",
+    url: "https://pokemongo.com/news/harvest-festival-2026?hl=eng",
+  },
+  {
+    id: "harvest-taken-over",
+    title: "Harvest Festival: Taken Over",
+    kind: "Team GO Rocket",
+    start: "2026-10-02T00:00:00",
+    end: "2026-10-05T20:00:00",
+    summary: "Team GO Rocket takes over Harvest Festival, with Shadow Zekrom and the chance to remove Frustration.",
+    spotlight: "Shadow Zekrom · Shadow Wimpod · Shadow Fomantis",
+    url: "https://pokemongo.com/news/harvest-festival-tgr-2026?hl=eng",
+  },
+  {
+    id: "max-battle-oct3",
+    title: "Max Battle Day",
+    kind: "Max Battle",
+    start: "2026-10-03T00:00:00",
+    end: "2026-10-03T23:59:59",
+    summary: "A Season event date announced by Pokémon GO. Check the official event page for the featured boss and local-time details.",
+    spotlight: "October 3",
+    url: "https://pokemongo.com/news/save-the-date-s24?hl=eng",
+  },
+  {
+    id: "community-oct10",
+    title: "October Community Day",
+    kind: "Community Day",
+    start: "2026-10-10T00:00:00",
+    end: "2026-10-10T23:59:59",
+    summary: "October Community Day date announced for the Twilight Trails season.",
+    spotlight: "October 10",
+    url: "https://pokemongo.com/news/save-the-date-s24?hl=eng",
+  },
+  {
+    id: "fall-marathon",
+    title: "Fall Marathon: Buddy Trek",
+    kind: "Seasonal event",
+    start: "2026-10-13T10:00:00",
+    end: "2026-10-19T20:00:00",
+    summary: "Bramblin makes its Pokémon GO debut, with Incense encounters and Mega Manectric Super Max progression.",
+    spotlight: "Bramblin · Electrike · Mega Manectric",
+    url: "https://pokemongo.com/news/fall-marathon-buddy-trek-2026",
+  },
+  {
+    id: "hatch-day-oct17",
+    title: "Hatch Day",
+    kind: "Hatch Day",
+    start: "2026-10-17T00:00:00",
+    end: "2026-10-17T23:59:59",
+    summary: "A Season event date announced by Pokémon GO. Featured Pokémon and bonuses may be announced closer to the day.",
+    spotlight: "October 17",
+    url: "https://pokemongo.com/news/save-the-date-s24?hl=eng",
+  },
+  {
+    id: "max-battle-oct24",
+    title: "Max Battle Day",
+    kind: "Max Battle",
+    start: "2026-10-24T00:00:00",
+    end: "2026-10-24T23:59:59",
+    summary: "A second October Max Battle Day is on the official Season calendar.",
+    spotlight: "October 24",
+    url: "https://pokemongo.com/news/save-the-date-s24?hl=eng",
+  },
+  {
+    id: "super-mega-oct31",
+    title: "Super Mega Raid Day",
+    kind: "Raid Day",
+    start: "2026-10-31T00:00:00",
+    end: "2026-10-31T23:59:59",
+    summary: "A Super Mega Raid Day is scheduled for Halloween. Check the official announcement as details arrive.",
+    spotlight: "October 31",
+    url: "https://pokemongo.com/news/save-the-date-s24?hl=eng",
+  },
+];
+
+function goEventStatus(ev) {
+  const now = Date.now();
+  const start = new Date(ev.start).getTime();
+  const end = new Date(ev.end).getTime();
+  if (now >= start && now <= end) return ["LIVE NOW", "live"];
+  if (now < start) {
+    const days = Math.ceil((start - now) / 86400000);
+    return [days <= 1 ? "STARTS SOON" : "IN " + days + " DAYS", "soon"];
+  }
+  return ["ENDED", "ended"];
+}
+function goEventDate(ev) {
+  const start = new Date(ev.start);
+  const end = new Date(ev.end);
+  const sameDay = start.toDateString() === end.toDateString();
+  const day = start.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  if (sameDay && start.getHours() === 0 && end.getHours() === 23) return day;
+  const startText = start.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  const endText = end.toLocaleString(undefined, sameDay
+    ? { hour: "numeric", minute: "2-digit" }
+    : { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  return startText + " → " + endText;
+}
 const navs = [
   ["discover", "compass", "Discover"],
   ["collection", "box", "My collection"],
@@ -326,13 +463,36 @@ function goView() {
     "Pack water",
     "Check official event details",
   ];
+  const events = goEvents
+    .filter((ev) => new Date(ev.end).getTime() > Date.now() - 43200000)
+    .slice(0, 8);
+  const eventCards = events
+    .map((ev) => {
+      const [status, statusClass] = goEventStatus(ev);
+      return \`<article class="event-card">
+        <div class="row between">
+          <span class="eyebrow">\${esc(ev.kind)}</span>
+          <span class="event-status \${statusClass}">\${status}</span>
+        </div>
+        <h3>\${esc(ev.title)}</h3>
+        <p class="small muted">\${esc(goEventDate(ev))} · local time</p>
+        <p class="space">\${esc(ev.summary)}</p>
+        <p class="small muted"><strong>Spotlight:</strong> \${esc(ev.spotlight)}</p>
+        <div class="row space">
+          <a class="btn" href="\${esc(ev.url)}" target="_blank" rel="noopener">Official details \${icon("arrow")}</a>
+          <button class="btn" type="button" data-action="event-calendar" data-value="\${esc(ev.id)}">\${icon("calendar")}Reminder</button>
+        </div>
+      </article>\`;
+    })
+    .join("");
   $("#main").innerHTML =
     heading(
       "OUTSIDE IS CALLING",
       "The GO companion.",
-      "Plan your next outing, one tiny adventure at a time.",
+      "Plan your next outing, build your GO box, and keep current events within reach.",
     ) +
-    `<div class="note"><strong>Personal GO tracker</strong> · Entries are added by you or imported from your own CSV. Dexterous does not connect to your Pokémon GO account or read live catches.</div><div class="stats-row space">${[
+    \`<div class="note"><strong>Personal GO tracker</strong> · Entries are added by you, through the bulk picker, or imported from your own CSV. Dexterous does not sign into or scrape your Pokémon GO account.</div>
+    <div class="stats-row space">\${[
       [go.length, "GO species logged"],
       [go.filter(([, e]) => e.shiny).length, "GO shinies"],
       [tagged("trade").length, "Trade wishlist entries"],
@@ -343,28 +503,83 @@ function goView() {
         "Walks you logged",
       ],
     ]
-      .map(
-        ([v, l]) =>
-          `<div class="stat"><strong>${v}</strong><span>${l}</span></div>`,
-      )
-      .join(
-        "",
-      )}</div><div class="grid2"><section class="panel"><div class="eyebrow">BEFORE YOU GO</div><h2 class="space">Adventure checklist</h2><div class="space">${tasks.map((t, i) => `<div class="goal"><label class="check"><input type="checkbox" data-check="go-${i}" ${store.data.checks["go-" + i] ? "checked" : ""}>${t}</label></div>`).join("")}</div><div class="row space">${button("Reset checklist", "reset-checks")}${button("Add calendar reminder", "calendar", false, "calendar")}</div></section><section class="panel"><div class="eyebrow">YOUR WALKING COMPANION</div><h2 class="space">Buddy business.</h2><div class="row space"><img src="${artwork(store.data.profile.buddy)}" alt="Your chosen buddy" width="110" height="110" style="object-fit:contain"><div><h3>${title(byId.get(store.data.profile.buddy)?.name || "Pikachu")}</h3><p class="muted small">One foot in front of the other.</p>${button("Choose buddy", "buddy-picker")}</div></div><div class="row space">${button("Log a walk", "journal-new", true)}${button("Import GO CSV", "go-import", false, "upload")}</div></section><section class="panel"><h2>Trade wishlists</h2><p class="muted small space">Mark Pokémon “For trade” or “Wishlist” in their collection details. Share a list when you are ready.</p><div class="row space">${button("View wishlist", "wishlist")}${button("Share trade list", "share-trades")}</div></section><section class="panel"><h2>Transfer to Pokémon HOME</h2><p class="muted small space">Transfers from GO to HOME are one-way. Check eligibility in the official app before transferring.</p><a class="btn space" href="https://support.pokemon.com/hc/en-us/articles/360050219032-How-to-transfer-Pok%C3%A9mon-from-Pok%C3%A9mon-GO-to-Pok%C3%A9mon-HOME" target="_blank" rel="noopener">Official transfer guide ${icon("arrow")}</a><a class="btn space" href="https://pokemongolive.com/events" target="_blank" rel="noopener">Official GO events ${icon("arrow")}</a></section></div><section class="panel space"><h2>Evolution goals</h2><p class="muted small space">Keep your candy, item, or walking goals here. For example: “Eevee — collect 25 candy”.</p>${goalsMarkup("go")}</section>`;
+      .map(([v, l]) => \`<div class="stat"><strong>\${v}</strong><span>\${l}</span></div>\`)
+      .join("")}</div>
+    <div class="grid2">
+      <section class="panel">
+        <div class="eyebrow">YOUR GO BOX</div>
+        <h2 class="space">Add a handful or a whole swarm.</h2>
+        <p class="muted small">Keep the CSV route, or use the bulk picker to tick species, Shiny/Lucky flags, and quantities directly.</p>
+        <div class="row space">
+          \${button("Bulk add Pokémon", "bulk-open", true, "plus")}
+          \${button("Import GO CSV", "go-import", false, "upload")}
+        </div>
+        <p class="small muted space">Bulk additions are marked as Pokémon GO catches and sync to your Dexterous cloud account when you are signed in.</p>
+      </section>
+      <section class="panel">
+        <div class="eyebrow">BEFORE YOU GO</div>
+        <h2 class="space">Adventure checklist</h2>
+        <div class="space">\${tasks.map((t, i) => \`<div class="goal"><label class="check"><input type="checkbox" data-check="go-\${i}" \${store.data.checks["go-" + i] ? "checked" : ""}>\${t}</label></div>\`).join("")}</div>
+        <div class="row space">\${button("Reset checklist", "reset-checks")}\${button("Add calendar reminder", "calendar", false, "calendar")}</div>
+      </section>
+      <section class="panel">
+        <div class="eyebrow">YOUR WALKING COMPANION</div>
+        <h2 class="space">Buddy business.</h2>
+        <div class="row space"><img src="\${artwork(store.data.profile.buddy)}" alt="Your chosen buddy" width="110" height="110" style="object-fit:contain"><div><h3>\${title(byId.get(store.data.profile.buddy)?.name || "Pikachu")}</h3><p class="muted small">One foot in front of the other.</p>\${button("Choose buddy", "buddy-picker")}</div></div>
+        <div class="row space">\${button("Log a walk", "journal-new", true)}</div>
+      </section>
+      <section class="panel">
+        <h2>Trade wishlists</h2>
+        <p class="muted small space">Mark Pokémon “For trade” or “Wishlist” in their collection details. Share a list when you are ready.</p>
+        <div class="row space">\${button("View wishlist", "wishlist")}\${button("Share trade list", "share-trades")}</div>
+      </section>
+    </div>
+    <section class="panel space">
+      <div class="row between"><div><div class="eyebrow">OFFICIAL EVENT RADAR</div><h2 class="space">What is happening in GO?</h2></div><a class="btn" href="https://pokemongo.com/events" target="_blank" rel="noopener">Full official calendar \${icon("arrow")}</a></div>
+      <p class="muted small">Seeded from official Pokémon GO announcements on 26 September 2026. Event details can change, so the official link on each card is the source of truth.</p>
+      <div class="event-grid space">\${eventCards || '<p class="muted">No seeded upcoming events remain. Check the official calendar.</p>'}</div>
+    </section>
+    <section class="panel space"><h2>Evolution goals</h2><p class="muted small space">Keep your candy, item, or walking goals here. For example: “Eevee — collect 25 candy”.</p>\${goalsMarkup("go")}</section>\`;
 }
 function labView() {
   const milestones = badges()
     .map(
       ([name, description, earned]) =>
-        `<div class="goal ${earned ? "done" : ""}"><span>${earned ? "✓" : "○"}</span><div><strong>${esc(name)}</strong><p class="small muted">${esc(description)}</p></div></div>`,
+        \`<div class="goal \${earned ? "done" : ""}"><span>\${earned ? "✓" : "○"}</span><div><strong>\${esc(name)}</strong><p class="small muted">\${esc(description)}</p></div></div>\`,
     )
     .join("");
   $("#main").innerHTML =
     heading(
-      "ODDMENTS, QUIZZES & FIELD NOTES",
+      "ODDMENTS, SIMULATORS & FIELD NOTES",
       "The little lab.",
-      "A few playful ways to explore what you have found.",
+      "Type puzzles, battle sandboxes, raid planning, and a few curious experiments.",
     ) +
-    `<div class="grid2"><section class="panel"><div class="eyebrow">A QUICK FIELD TEST</div><h2 class="space">Type something surprising.</h2><p class="muted small space">Check attack matchups across all eighteen types.</p><div class="row space">${button("Open type chart", "type-chart", true, "grid")}${button("Start a five-question quiz", "quiz", false, "spark")}</div></section><section class="panel"><div class="eyebrow">YOUR ADVENTURE, IN A NUTSHELL</div><h2 class="space">Little milestones.</h2><div class="stack space">${milestones}</div><div class="row space">${button("Trainer Wrapped", "wrapped", false, "trophy")}${button("Find my trainer style", "personality", false, "spark")}</div></section></div>`;
+    \`<div class="grid2">
+      <section class="panel">
+        <div class="eyebrow">A QUICK FIELD TEST</div>
+        <h2 class="space">Type something surprising.</h2>
+        <p class="muted small space">Check attack matchups across all eighteen types.</p>
+        <div class="row space">\${button("Open type chart", "type-chart", true, "grid")}\${button("Start a five-question quiz", "quiz", false, "spark")}</div>
+      </section>
+      <section class="panel sim-panel">
+        <div class="eyebrow">BATTLE LAB</div>
+        <h2 class="space">Two Pokémon enter the sandbox.</h2>
+        <p class="muted small">Run a lightweight 1v1 using base stats, Speed and type effectiveness. It is deliberately not presented as an exact GO or main-series damage calculator.</p>
+        <div class="row space">\${button("Run 1v1 simulation", "battle-sim", true, "bolt")}</div>
+      </section>
+      <section class="panel sim-panel">
+        <div class="eyebrow">RAID LAB</div>
+        <h2 class="space">How spicy is this raid?</h2>
+        <p class="muted small">Choose a boss, raid tier and group size, then score your current six-Pokémon team for type pressure and base-stat firepower.</p>
+        <div class="row space">\${button("Open raid simulator", "raid-sim", true, "shield")}</div>
+      </section>
+      <section class="panel">
+        <div class="eyebrow">YOUR ADVENTURE, IN A NUTSHELL</div>
+        <h2 class="space">Little milestones.</h2>
+        <div class="stack space">\${milestones}</div>
+        <div class="row space">\${button("Trainer Wrapped", "wrapped", false, "trophy")}\${button("Find my trainer style", "personality", false, "spark")}</div>
+      </section>
+    </div>\`;
 }
 function goalsMarkup() {
   return `<div>${store.data.goals.map((g) => `<div class="goal ${g.done ? "done" : ""}"><label class="check"><input type="checkbox" data-goal="${g.id}" ${g.done ? "checked" : ""}>${esc(g.text)}</label><button class="iconbtn" data-action="goal-delete" data-value="${g.id}" aria-label="Delete goal">${icon("trash")}</button></div>`).join("")}</div><form class="goal-form" id="goal-form"><input name="goal" placeholder="One small goal…" aria-label="New goal" maxlength="200" required><button class="btn primary">Add goal ${icon("plus")}</button></form>`;
@@ -598,8 +813,16 @@ function mutateFlag(id, key) {
 }
 function picker(purpose) {
   detailId = null;
+  const labels = {
+    buddy: "Choose your buddy",
+    compare: "Compare Pokémon",
+    team: "Choose a teammate",
+    "battle-a": "Choose the first battler",
+    "battle-b": "Choose the second battler",
+    raid: "Choose a raid boss",
+  };
   modal(
-    `<div class="modal-header"><h2>${purpose === "buddy" ? "Choose your buddy" : purpose === "compare" ? "Compare Pokémon" : "Choose a teammate"}</h2></div><label class="search">${icon("search")}<input id="picker-search" placeholder="Search Pokémon…" aria-label="Find Pokémon" data-purpose="${purpose}"></label><div id="picker-results" class="evolutions">${pickerResults("", purpose)}</div>`,
+    \`<div class="modal-header"><h2>\${labels[purpose] || "Choose a Pokémon"}</h2></div><label class="search">\${icon("search")}<input id="picker-search" placeholder="Search Pokémon…" aria-label="Find Pokémon" data-purpose="\${purpose}"></label><div id="picker-results" class="evolutions">\${pickerResults("", purpose)}</div>\`,
   );
 }
 function pickerResults(q, purpose) {
@@ -607,12 +830,12 @@ function pickerResults(q, purpose) {
     .filter(
       (p) =>
         p.name.includes(q.toLowerCase().replaceAll(" ", "-")) ||
-        String(p.id) === q,
+        String(p.id) === q.replace("#", ""),
     )
-    .slice(0, 12)
+    .slice(0, purpose === "raid" ? 18 : 12)
     .map(
       (p) =>
-        `<button class="evolution" data-action="pick-${purpose}" data-id="${p.id}"><img src="${artwork(p.id)}" alt="" loading="lazy"><span>${title(p.name)}</span></button>`,
+        \`<button class="evolution" data-action="pick-\${purpose}" data-id="\${p.id}"><img src="\${artwork(p.id)}" alt="" loading="lazy"><span>\${title(p.name)}</span><small>\${regions[p.gen]}</small></button>\`,
     )
     .join("");
 }
@@ -774,17 +997,174 @@ function personality() {
     true,
   );
 }
-function calendarModal() {
+function calendarModal(eventId = "") {
+  const ev = goEvents.find((x) => x.id === eventId);
+  const start = ev ? new Date(ev.start) : null;
+  const localValue =
+    start && !Number.isNaN(+start)
+      ? new Date(start.getTime() - start.getTimezoneOffset() * 60000)
+          .toISOString()
+          .slice(0, 16)
+      : "";
   modal(
-    `<div class="modal-header"><h2>Plan a little outing</h2></div><form class="stack" id="calendar-form"><label>Event name<input name="name" value="Pokémon adventure" required maxlength="100"></label><label>Date and time<input type="datetime-local" name="time" required></label><label>Note<input name="note" placeholder="Charge phone. Water. Snacks." maxlength="200"></label><button class="btn primary">Download calendar reminder</button><p class="small muted">Open the .ics file in Google Calendar, Apple Calendar, or Outlook to add the event and its 30-minute reminder.</p></form>`,
+    \`<div class="modal-header"><h2>Plan a little outing</h2></div><form class="stack" id="calendar-form"><label>Event name<input name="name" value="\${esc(ev?.title || "Pokémon adventure")}" required maxlength="100"></label><label>Date and time<input name="time" type="datetime-local" value="\${esc(localValue)}" required></label><label>Note<input name="note" value="\${esc(ev ? ev.kind + " · Check official details before heading out." : "")}" placeholder="Charge phone. Water. Snacks." maxlength="200"></label><button class="btn primary">Download calendar reminder</button><p class="small muted">Open the .ics file in Google Calendar, Apple Calendar, or Outlook to add the reminder.</p></form>\`,
     true,
   );
 }
 function csvModal() {
   modal(
-    `<div class="modal-header"><h2>Bring your GO list</h2></div><p class="muted small">Import your own CSV with columns: name, shiny, lucky, count. Use true or false for flags. Preview entries before adding them.</p><div class="row space">${button("Download CSV template", "csv-template")}</div><label class="space">Choose CSV<input type="file" id="go-csv" accept=".csv,text/csv"></label><div id="csv-preview" class="space"></div>`,
+    \`<div class="modal-header"><h2>Bring your GO list</h2></div><p class="muted small">CSV is staying. Import your own file with columns: name, shiny, lucky, count. Use true or false for flags, then preview before saving.</p><div class="row space">\${button("Download CSV template", "csv-template")}\${button("Use bulk picker instead", "bulk-open", true, "plus")}</div><label class="space">Choose CSV<input type="file" id="go-csv" accept=".csv,text/csv"></label><div id="csv-preview" class="space"></div>\`,
   );
 }
+
+function bulkSummary() {
+  const el = $("#bulk-summary");
+  if (el) el.textContent = bulkSelected.size + " selected";
+}
+function bulkRows() {
+  const q = bulkQuery.trim().toLowerCase().replaceAll(" ", "-");
+  return catalog
+    .filter((p) => (!bulkGen || p.gen === +bulkGen) && (!q || p.name.includes(q) || String(p.id) === q.replace("#", "")))
+    .slice(0, 100)
+    .map((p) => {
+      const picked = bulkSelected.get(p.id);
+      return \`<div class="bulk-row \${picked ? "selected" : ""}">
+        <input type="checkbox" data-bulk-id="\${p.id}" aria-label="Select \${title(p.name)}" \${picked ? "checked" : ""}>
+        <img src="\${artwork(p.id, !!picked?.shiny)}" alt="" loading="lazy">
+        <div class="bulk-name"><strong>\${title(p.name)}</strong><span>#\${String(p.id).padStart(4, "0")} · \${regions[p.gen]} · \${p.types.map(title).join(" / ")}</span></div>
+        <label class="bulk-flag"><input type="checkbox" data-bulk-shiny="\${p.id}" \${picked?.shiny ? "checked" : ""}>Shiny</label>
+        <label class="bulk-flag"><input type="checkbox" data-bulk-lucky="\${p.id}" \${picked?.lucky ? "checked" : ""}>Lucky</label>
+        <label class="bulk-count">Qty<input type="number" min="1" max="999" value="\${picked?.count || 1}" data-bulk-count="\${p.id}"></label>
+      </div>\`;
+    })
+    .join("");
+}
+function renderBulkRows() {
+  const target = $("#bulk-results");
+  if (target) target.innerHTML = bulkRows() || '<div class="empty"><h3>No Pokémon found.</h3><p>Try a different name, number, or region.</p></div>';
+  bulkSummary();
+}
+function bulkPicker(reset = true) {
+  detailId = null;
+  if (reset) {
+    bulkSelected = new Map();
+    bulkQuery = "";
+    bulkGen = "";
+  }
+  const regionOptions = regions
+    .slice(1)
+    .map((r, i) => \`<option value="\${i + 1}" \${+bulkGen === i + 1 ? "selected" : ""}>\${r}</option>\`)
+    .join("");
+  modal(
+    \`<div class="modal-header"><div><div class="eyebrow">GO BOX BUILDER</div><h2>Bulk add Pokémon</h2></div><span class="pill" id="bulk-summary">\${bulkSelected.size} selected</span></div>
+    <p class="muted small">Tick as many as you like. Shiny, Lucky and quantity can be set per species before saving.</p>
+    <div class="filters space"><label class="search">\${icon("search")}<input id="bulk-search" value="\${esc(bulkQuery)}" placeholder="Search name or Pokédex number…"></label><select id="bulk-region"><option value="">All regions</option>\${regionOptions}</select></div>
+    <div id="bulk-results" class="bulk-list">\${bulkRows()}</div>
+    <div class="sticky-actions"><span class="small muted">Your CSV importer remains available in GO companion.</span><div class="row">\${button("Clear", "bulk-clear")}\${button("Add selected to GO", "bulk-confirm", true, "plus")}</div></div>\`,
+  );
+}
+
+function bestTypeEdge(attacker, defender) {
+  return Math.max(...attacker.types.map((t) => multiplier(t, defender.types)));
+}
+function battleStrike(attacker, defender) {
+  const offence = Math.max(attacker.stats[1], attacker.stats[3]);
+  const defence = Math.max(1, (defender.stats[2] + defender.stats[4]) / 2);
+  const edge = bestTypeEdge(attacker, defender);
+  if (edge === 0) return { damage: 0, edge };
+  const damage = Math.max(3, Math.min(45, Math.round(11 * (offence / defence) * edge)));
+  return { damage, edge };
+}
+function simulateBattle(a, b) {
+  let hpA = 100, hpB = 100;
+  const log = [];
+  const aFirst = a.stats[5] >= b.stats[5];
+  const order = aFirst ? [[a, b, "a"], [b, a, "b"]] : [[b, a, "b"], [a, b, "a"]];
+  for (let round = 1; round <= 8 && hpA > 0 && hpB > 0; round++) {
+    for (const [attacker, defender, side] of order) {
+      if (hpA <= 0 || hpB <= 0) break;
+      const hit = battleStrike(attacker, defender);
+      if (side === "a") hpB = Math.max(0, hpB - hit.damage);
+      else hpA = Math.max(0, hpA - hit.damage);
+      log.push({
+        round,
+        attacker: title(attacker.name),
+        damage: hit.damage,
+        edge: hit.edge,
+        hpA,
+        hpB,
+      });
+    }
+  }
+  const winner = hpA === hpB ? null : hpA > hpB ? a : b;
+  return { hpA, hpB, winner, log };
+}
+function battleModal() {
+  const a = byId.get(battleState.a) || catalog[0];
+  const b = byId.get(battleState.b) || catalog[1];
+  const sim = simulateBattle(a, b);
+  const latest = sim.log.slice(-6);
+  const verdict = sim.winner
+    ? title(sim.winner.name) + " has the sandbox edge"
+    : "The sandbox calls it even";
+  modal(
+    \`<div class="modal-header"><div><div class="eyebrow">BATTLE LAB</div><h2>1v1 sandbox</h2></div></div>
+    <p class="note"><strong>Strategy sandbox, not a battle oracle.</strong> This uses main-series base stats, Speed and type effectiveness only. Moves, levels, IVs, abilities, shields, energy, weather and Pokémon GO battle tuning are not modelled.</p>
+    <div class="versus-grid space">
+      <button class="sim-pick" data-action="battle-choose-a"><img src="\${artwork(a.id)}" alt=""><span>\${title(a.name)}</span><small>\${a.types.map(title).join(" / ")}</small></button>
+      <div class="versus-mark">VS</div>
+      <button class="sim-pick" data-action="battle-choose-b"><img src="\${artwork(b.id)}" alt=""><span>\${title(b.name)}</span><small>\${b.types.map(title).join(" / ")}</small></button>
+    </div>
+    <section class="sim-result">
+      <div class="row between"><strong>\${verdict}</strong><span class="pill">\${sim.log.length} exchanges</span></div>
+      <div class="battle-hp space"><div><span>\${title(a.name)} · \${sim.hpA}%</span><div class="progress"><i style="width:\${sim.hpA}%"></i></div></div><div><span>\${title(b.name)} · \${sim.hpB}%</span><div class="progress"><i style="width:\${sim.hpB}%"></i></div></div></div>
+      <div class="battle-log">\${latest.map((x) => \`<p><strong>R\${x.round}</strong> · \${x.attacker} deals \${x.damage} sandbox damage\${x.edge > 1 ? " · super effective ×" + x.edge : x.edge < 1 ? " · resisted ×" + x.edge : ""}</p>\`).join("")}</div>
+    </section>
+    <div class="row space">\${button("Swap sides", "battle-swap")}\${button("Run again", "battle-sim", true, "bolt")}</div>\`,
+  );
+}
+function raidReadiness(boss, tier, players) {
+  const squad = store.data.team.map((id) => byId.get(id)).filter(Boolean);
+  const bossDefence = Math.max(1, (boss.stats[2] + boss.stats[4]) / 2);
+  const pressure = squad.reduce((sum, p) => {
+    const offence = Math.max(p.stats[1], p.stats[3]);
+    return sum + (offence / bossDefence) * bestTypeEdge(p, boss);
+  }, 0);
+  const tierFactor = { "1": 1.8, "3": 3.2, "5": 5.2, mega: 6.0 }[tier] || 5.2;
+  const index = Math.max(0, Math.min(250, Math.round((pressure * players * 100) / (tierFactor * 2.5))));
+  const label =
+    index >= 120 ? "Strong pressure" :
+    index >= 80 ? "Promising" :
+    index >= 50 ? "Needs more counter power" :
+    "Rough matchup";
+  return { squad, index, label };
+}
+function raidModal() {
+  const boss = byId.get(raidState.boss) || byId.get(150) || catalog[0];
+  const result = raidReadiness(boss, raidState.tier, raidState.players);
+  const counters = types
+    .map((t) => ({ t, m: multiplier(t, boss.types) }))
+    .filter((x) => x.m > 1)
+    .sort((a, b) => b.m - a.m)
+    .slice(0, 6);
+  modal(
+    \`<div class="modal-header"><div><div class="eyebrow">RAID LAB</div><h2>Raid readiness simulator</h2></div></div>
+    <p class="note"><strong>Planning index, not an exact win prediction.</strong> Dexterous is using your Team Builder squad, base stats and type matchups. Live GO movesets, CP, IVs, friendship boosts, weather, dodging and raid-boss tuning are outside this sandbox.</p>
+    <div class="raid-boss space"><button class="sim-pick" data-action="raid-choose"><img src="\${artwork(boss.id)}" alt=""><span>\${title(boss.name)}</span><small>Tap to change boss</small></button><div><div class="types">\${boss.types.map((t) => \`<span class="type \${t}">\${t}</span>\`).join("")}</div><h3 class="space">Counter types</h3><div class="types">\${counters.map((x) => \`<span class="type \${x.t}">\${title(x.t)} ×\${x.m}</span>\`).join("") || '<span class="muted">No super-effective single type found.</span>'}</div></div></div>
+    <form id="raid-sim-form" class="form-grid space">
+      <label>Raid tier<select name="tier"><option value="1" \${raidState.tier === "1" ? "selected" : ""}>Tier 1</option><option value="3" \${raidState.tier === "3" ? "selected" : ""}>Tier 3</option><option value="5" \${raidState.tier === "5" ? "selected" : ""}>Tier 5</option><option value="mega" \${raidState.tier === "mega" ? "selected" : ""}>Mega / Super Mega</option></select></label>
+      <label>Estimated trainers<input name="players" type="number" min="1" max="20" value="\${raidState.players}"></label>
+      <button class="btn primary full">Recalculate</button>
+    </form>
+    <section class="sim-result">
+      <div class="row between"><div><span class="eyebrow">READINESS INDEX</span><h2>\${result.index}%</h2></div><span class="pill">\${result.label}</span></div>
+      <div class="progress raid-meter"><i style="width:\${Math.min(100, result.index)}%"></i></div>
+      <p class="small muted space">\${result.squad.length ? "Using your current team of " + result.squad.map((p) => title(p.name)).join(", ") + "." : "Your Team Builder is empty. Add up to six Pokémon first for a meaningful score."}</p>
+    </section>\`,
+  );
+}
+
+let importRows = [];
 let importRows = [];
 function parseCsv(text) {
   const rows = [];
@@ -1123,6 +1503,74 @@ document.addEventListener("click", async (ev) => {
       case "go-import":
         csvModal();
         break;
+      case "bulk-open":
+        bulkPicker(true);
+        break;
+      case "bulk-clear":
+        bulkSelected = new Map();
+        renderBulkRows();
+        break;
+      case "bulk-confirm":
+        if (!bulkSelected.size) {
+          toast("Pick at least one Pokémon first.");
+          break;
+        }
+        for (const [bulkId, values] of bulkSelected) {
+          store.data.collection[bulkId] = {
+            ...entry(bulkId),
+            caught: true,
+            seen: true,
+            source: "go",
+            shiny: !!values.shiny,
+            lucky: !!values.lucky,
+            count: Math.max(1, Math.min(999, +values.count || 1)),
+            date: entry(bulkId).date || date(),
+          };
+        }
+        await save();
+        const bulkCount = bulkSelected.size;
+        bulkSelected = new Map();
+        closeModal();
+        renderView();
+        toast(bulkCount + " GO species added.");
+        break;
+      case "battle-sim":
+        battleModal();
+        break;
+      case "battle-choose-a":
+        picker("battle-a");
+        break;
+      case "battle-choose-b":
+        picker("battle-b");
+        break;
+      case "pick-battle-a":
+        battleState.a = id;
+        battleModal();
+        break;
+      case "pick-battle-b":
+        battleState.b = id;
+        battleModal();
+        break;
+      case "battle-swap": {
+        const oldA = battleState.a;
+        battleState.a = battleState.b;
+        battleState.b = oldA;
+        battleModal();
+        break;
+      }
+      case "raid-sim":
+        raidModal();
+        break;
+      case "raid-choose":
+        picker("raid");
+        break;
+      case "pick-raid":
+        raidState.boss = id;
+        raidModal();
+        break;
+      case "event-calendar":
+        calendarModal(v);
+        break;
       case "csv-template":
         download(
           "dexterous-go-template.csv",
@@ -1235,6 +1683,10 @@ document.addEventListener("input", (ev) => {
       el.value,
       el.dataset.purpose,
     );
+  if (el.id === "bulk-search") {
+    bulkQuery = el.value;
+    renderBulkRows();
+  }
 });
 document.addEventListener("change", async (ev) => {
   const el = ev.target;
@@ -1282,6 +1734,49 @@ document.addEventListener("change", async (ev) => {
       store.data.preferences.motion = el.checked;
       prefs();
       save();
+    }
+    if (el.id === "bulk-region") {
+      bulkGen = el.value;
+      renderBulkRows();
+    }
+    if (el.dataset.bulkId) {
+      const bulkId = +el.dataset.bulkId;
+      if (el.checked) {
+        const existing = bulkSelected.get(bulkId) || { shiny: false, lucky: false, count: 1 };
+        bulkSelected.set(bulkId, existing);
+      } else bulkSelected.delete(bulkId);
+      bulkSummary();
+      el.closest(".bulk-row")?.classList.toggle("selected", el.checked);
+    }
+    if (el.dataset.bulkShiny) {
+      const bulkId = +el.dataset.bulkShiny;
+      const values = bulkSelected.get(bulkId) || { shiny: false, lucky: false, count: 1 };
+      values.shiny = el.checked;
+      bulkSelected.set(bulkId, values);
+      const pick = document.querySelector('[data-bulk-id="' + bulkId + '"]');
+      if (pick) pick.checked = true;
+      bulkSummary();
+      el.closest(".bulk-row")?.classList.add("selected");
+    }
+    if (el.dataset.bulkLucky) {
+      const bulkId = +el.dataset.bulkLucky;
+      const values = bulkSelected.get(bulkId) || { shiny: false, lucky: false, count: 1 };
+      values.lucky = el.checked;
+      bulkSelected.set(bulkId, values);
+      const pick = document.querySelector('[data-bulk-id="' + bulkId + '"]');
+      if (pick) pick.checked = true;
+      bulkSummary();
+      el.closest(".bulk-row")?.classList.add("selected");
+    }
+    if (el.dataset.bulkCount) {
+      const bulkId = +el.dataset.bulkCount;
+      const values = bulkSelected.get(bulkId) || { shiny: false, lucky: false, count: 1 };
+      values.count = Math.max(1, Math.min(999, +el.value || 1));
+      bulkSelected.set(bulkId, values);
+      const pick = document.querySelector('[data-bulk-id="' + bulkId + '"]');
+      if (pick) pick.checked = true;
+      bulkSummary();
+      el.closest(".bulk-row")?.classList.add("selected");
     }
     if (el.id === "go-csv") {
       const file = el.files[0];
@@ -1380,6 +1875,11 @@ document.addEventListener("submit", async (ev) => {
       });
       await save();
       renderView();
+    }
+    if (form.id === "raid-sim-form") {
+      raidState.tier = ["1", "3", "5", "mega"].includes(values.tier) ? values.tier : "5";
+      raidState.players = Math.max(1, Math.min(20, +values.players || 1));
+      raidModal();
     }
     if (form.id === "calendar-form") {
       const dt = new Date(values.time);
