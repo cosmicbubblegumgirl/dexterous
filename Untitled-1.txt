@@ -1,0 +1,1 @@
+C:\Users\simon\AppData\Local\GitKrakenCLI\gk.exe auth login 5c0a6aaa-c6e9-4d88-8dfa-38be4543e58c

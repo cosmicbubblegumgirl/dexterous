@@ -1,0 +1,12 @@
+{
+  "name": "Dexterous · Pokémon field guide",
+  "short_name": "Dexterous",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f0f6ed",
+  "theme_color": "#f0f6ed",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
