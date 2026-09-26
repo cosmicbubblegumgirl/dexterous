@@ -469,20 +469,20 @@ function goView() {
   const eventCards = events
     .map((ev) => {
       const [status, statusClass] = goEventStatus(ev);
-      return \`<article class="event-card">
+      return `<article class="event-card">
         <div class="row between">
-          <span class="eyebrow">\${esc(ev.kind)}</span>
-          <span class="event-status \${statusClass}">\${status}</span>
+          <span class="eyebrow">${esc(ev.kind)}</span>
+          <span class="event-status ${statusClass}">${status}</span>
         </div>
-        <h3>\${esc(ev.title)}</h3>
-        <p class="small muted">\${esc(goEventDate(ev))} · local time</p>
-        <p class="space">\${esc(ev.summary)}</p>
-        <p class="small muted"><strong>Spotlight:</strong> \${esc(ev.spotlight)}</p>
+        <h3>${esc(ev.title)}</h3>
+        <p class="small muted">${esc(goEventDate(ev))} · local time</p>
+        <p class="space">${esc(ev.summary)}</p>
+        <p class="small muted"><strong>Spotlight:</strong> ${esc(ev.spotlight)}</p>
         <div class="row space">
-          <a class="btn" href="\${esc(ev.url)}" target="_blank" rel="noopener">Official details \${icon("arrow")}</a>
-          <button class="btn" type="button" data-action="event-calendar" data-value="\${esc(ev.id)}">\${icon("calendar")}Reminder</button>
+          <a class="btn" href="${esc(ev.url)}" target="_blank" rel="noopener">Official details ${icon("arrow")}</a>
+          <button class="btn" type="button" data-action="event-calendar" data-value="${esc(ev.id)}">${icon("calendar")}Reminder</button>
         </div>
-      </article>\`;
+      </article>`;
     })
     .join("");
   $("#main").innerHTML =
@@ -491,8 +491,8 @@ function goView() {
       "The GO companion.",
       "Plan your next outing, build your GO box, and keep current events within reach.",
     ) +
-    \`<div class="note"><strong>Personal GO tracker</strong> · Entries are added by you, through the bulk picker, or imported from your own CSV. Dexterous does not sign into or scrape your Pokémon GO account.</div>
-    <div class="stats-row space">\${[
+    `<div class="note"><strong>Personal GO tracker</strong> · Entries are added by you, through the bulk picker, or imported from your own CSV. Dexterous does not sign into or scrape your Pokémon GO account.</div>
+    <div class="stats-row space">${[
       [go.length, "GO species logged"],
       [go.filter(([, e]) => e.shiny).length, "GO shinies"],
       [tagged("trade").length, "Trade wishlist entries"],
@@ -503,7 +503,7 @@ function goView() {
         "Walks you logged",
       ],
     ]
-      .map(([v, l]) => \`<div class="stat"><strong>\${v}</strong><span>\${l}</span></div>\`)
+      .map(([v, l]) => `<div class="stat"><strong>${v}</strong><span>${l}</span></div>`)
       .join("")}</div>
     <div class="grid2">
       <section class="panel">
@@ -511,41 +511,41 @@ function goView() {
         <h2 class="space">Add a handful or a whole swarm.</h2>
         <p class="muted small">Keep the CSV route, or use the bulk picker to tick species, Shiny/Lucky flags, and quantities directly.</p>
         <div class="row space">
-          \${button("Bulk add Pokémon", "bulk-open", true, "plus")}
-          \${button("Import GO CSV", "go-import", false, "upload")}
+          ${button("Bulk add Pokémon", "bulk-open", true, "plus")}
+          ${button("Import GO CSV", "go-import", false, "upload")}
         </div>
         <p class="small muted space">Bulk additions are marked as Pokémon GO catches and sync to your Dexterous cloud account when you are signed in.</p>
       </section>
       <section class="panel">
         <div class="eyebrow">BEFORE YOU GO</div>
         <h2 class="space">Adventure checklist</h2>
-        <div class="space">\${tasks.map((t, i) => \`<div class="goal"><label class="check"><input type="checkbox" data-check="go-\${i}" \${store.data.checks["go-" + i] ? "checked" : ""}>\${t}</label></div>\`).join("")}</div>
-        <div class="row space">\${button("Reset checklist", "reset-checks")}\${button("Add calendar reminder", "calendar", false, "calendar")}</div>
+        <div class="space">${tasks.map((t, i) => `<div class="goal"><label class="check"><input type="checkbox" data-check="go-${i}" ${store.data.checks["go-" + i] ? "checked" : ""}>${t}</label></div>`).join("")}</div>
+        <div class="row space">${button("Reset checklist", "reset-checks")}${button("Add calendar reminder", "calendar", false, "calendar")}</div>
       </section>
       <section class="panel">
         <div class="eyebrow">YOUR WALKING COMPANION</div>
         <h2 class="space">Buddy business.</h2>
-        <div class="row space"><img src="\${artwork(store.data.profile.buddy)}" alt="Your chosen buddy" width="110" height="110" style="object-fit:contain"><div><h3>\${title(byId.get(store.data.profile.buddy)?.name || "Pikachu")}</h3><p class="muted small">One foot in front of the other.</p>\${button("Choose buddy", "buddy-picker")}</div></div>
-        <div class="row space">\${button("Log a walk", "journal-new", true)}</div>
+        <div class="row space"><img src="${artwork(store.data.profile.buddy)}" alt="Your chosen buddy" width="110" height="110" style="object-fit:contain"><div><h3>${title(byId.get(store.data.profile.buddy)?.name || "Pikachu")}</h3><p class="muted small">One foot in front of the other.</p>${button("Choose buddy", "buddy-picker")}</div></div>
+        <div class="row space">${button("Log a walk", "journal-new", true)}</div>
       </section>
       <section class="panel">
         <h2>Trade wishlists</h2>
         <p class="muted small space">Mark Pokémon “For trade” or “Wishlist” in their collection details. Share a list when you are ready.</p>
-        <div class="row space">\${button("View wishlist", "wishlist")}\${button("Share trade list", "share-trades")}</div>
+        <div class="row space">${button("View wishlist", "wishlist")}${button("Share trade list", "share-trades")}</div>
       </section>
     </div>
     <section class="panel space">
-      <div class="row between"><div><div class="eyebrow">OFFICIAL EVENT RADAR</div><h2 class="space">What is happening in GO?</h2></div><a class="btn" href="https://pokemongo.com/events" target="_blank" rel="noopener">Full official calendar \${icon("arrow")}</a></div>
+      <div class="row between"><div><div class="eyebrow">OFFICIAL EVENT RADAR</div><h2 class="space">What is happening in GO?</h2></div><a class="btn" href="https://pokemongo.com/events" target="_blank" rel="noopener">Full official calendar ${icon("arrow")}</a></div>
       <p class="muted small">Seeded from official Pokémon GO announcements on 26 September 2026. Event details can change, so the official link on each card is the source of truth.</p>
-      <div class="event-grid space">\${eventCards || '<p class="muted">No seeded upcoming events remain. Check the official calendar.</p>'}</div>
+      <div class="event-grid space">${eventCards || '<p class="muted">No seeded upcoming events remain. Check the official calendar.</p>'}</div>
     </section>
-    <section class="panel space"><h2>Evolution goals</h2><p class="muted small space">Keep your candy, item, or walking goals here. For example: “Eevee — collect 25 candy”.</p>\${goalsMarkup("go")}</section>\`;
+    <section class="panel space"><h2>Evolution goals</h2><p class="muted small space">Keep your candy, item, or walking goals here. For example: “Eevee — collect 25 candy”.</p>${goalsMarkup("go")}</section>`;
 }
 function labView() {
   const milestones = badges()
     .map(
       ([name, description, earned]) =>
-        \`<div class="goal \${earned ? "done" : ""}"><span>\${earned ? "✓" : "○"}</span><div><strong>\${esc(name)}</strong><p class="small muted">\${esc(description)}</p></div></div>\`,
+        `<div class="goal ${earned ? "done" : ""}"><span>${earned ? "✓" : "○"}</span><div><strong>${esc(name)}</strong><p class="small muted">${esc(description)}</p></div></div>`,
     )
     .join("");
   $("#main").innerHTML =
@@ -554,32 +554,32 @@ function labView() {
       "The little lab.",
       "Type puzzles, battle sandboxes, raid planning, and a few curious experiments.",
     ) +
-    \`<div class="grid2">
+    `<div class="grid2">
       <section class="panel">
         <div class="eyebrow">A QUICK FIELD TEST</div>
         <h2 class="space">Type something surprising.</h2>
         <p class="muted small space">Check attack matchups across all eighteen types.</p>
-        <div class="row space">\${button("Open type chart", "type-chart", true, "grid")}\${button("Start a five-question quiz", "quiz", false, "spark")}</div>
+        <div class="row space">${button("Open type chart", "type-chart", true, "grid")}${button("Start a five-question quiz", "quiz", false, "spark")}</div>
       </section>
       <section class="panel sim-panel">
         <div class="eyebrow">BATTLE LAB</div>
         <h2 class="space">Two Pokémon enter the sandbox.</h2>
         <p class="muted small">Run a lightweight 1v1 using base stats, Speed and type effectiveness. It is deliberately not presented as an exact GO or main-series damage calculator.</p>
-        <div class="row space">\${button("Run 1v1 simulation", "battle-sim", true, "bolt")}</div>
+        <div class="row space">${button("Run 1v1 simulation", "battle-sim", true, "bolt")}</div>
       </section>
       <section class="panel sim-panel">
         <div class="eyebrow">RAID LAB</div>
         <h2 class="space">How spicy is this raid?</h2>
         <p class="muted small">Choose a boss, raid tier and group size, then score your current six-Pokémon team for type pressure and base-stat firepower.</p>
-        <div class="row space">\${button("Open raid simulator", "raid-sim", true, "shield")}</div>
+        <div class="row space">${button("Open raid simulator", "raid-sim", true, "shield")}</div>
       </section>
       <section class="panel">
         <div class="eyebrow">YOUR ADVENTURE, IN A NUTSHELL</div>
         <h2 class="space">Little milestones.</h2>
-        <div class="stack space">\${milestones}</div>
-        <div class="row space">\${button("Trainer Wrapped", "wrapped", false, "trophy")}\${button("Find my trainer style", "personality", false, "spark")}</div>
+        <div class="stack space">${milestones}</div>
+        <div class="row space">${button("Trainer Wrapped", "wrapped", false, "trophy")}${button("Find my trainer style", "personality", false, "spark")}</div>
       </section>
-    </div>\`;
+    </div>`;
 }
 function goalsMarkup() {
   return `<div>${store.data.goals.map((g) => `<div class="goal ${g.done ? "done" : ""}"><label class="check"><input type="checkbox" data-goal="${g.id}" ${g.done ? "checked" : ""}>${esc(g.text)}</label><button class="iconbtn" data-action="goal-delete" data-value="${g.id}" aria-label="Delete goal">${icon("trash")}</button></div>`).join("")}</div><form class="goal-form" id="goal-form"><input name="goal" placeholder="One small goal…" aria-label="New goal" maxlength="200" required><button class="btn primary">Add goal ${icon("plus")}</button></form>`;
@@ -822,7 +822,7 @@ function picker(purpose) {
     raid: "Choose a raid boss",
   };
   modal(
-    \`<div class="modal-header"><h2>\${labels[purpose] || "Choose a Pokémon"}</h2></div><label class="search">\${icon("search")}<input id="picker-search" placeholder="Search Pokémon…" aria-label="Find Pokémon" data-purpose="\${purpose}"></label><div id="picker-results" class="evolutions">\${pickerResults("", purpose)}</div>\`,
+    `<div class="modal-header"><h2>${labels[purpose] || "Choose a Pokémon"}</h2></div><label class="search">${icon("search")}<input id="picker-search" placeholder="Search Pokémon…" aria-label="Find Pokémon" data-purpose="${purpose}"></label><div id="picker-results" class="evolutions">${pickerResults("", purpose)}</div>`,
   );
 }
 function pickerResults(q, purpose) {
@@ -835,7 +835,7 @@ function pickerResults(q, purpose) {
     .slice(0, purpose === "raid" ? 18 : 12)
     .map(
       (p) =>
-        \`<button class="evolution" data-action="pick-\${purpose}" data-id="\${p.id}"><img src="\${artwork(p.id)}" alt="" loading="lazy"><span>\${title(p.name)}</span><small>\${regions[p.gen]}</small></button>\`,
+        `<button class="evolution" data-action="pick-${purpose}" data-id="${p.id}"><img src="${artwork(p.id)}" alt="" loading="lazy"><span>${title(p.name)}</span><small>${regions[p.gen]}</small></button>`,
     )
     .join("");
 }
@@ -1007,13 +1007,13 @@ function calendarModal(eventId = "") {
           .slice(0, 16)
       : "";
   modal(
-    \`<div class="modal-header"><h2>Plan a little outing</h2></div><form class="stack" id="calendar-form"><label>Event name<input name="name" value="\${esc(ev?.title || "Pokémon adventure")}" required maxlength="100"></label><label>Date and time<input name="time" type="datetime-local" value="\${esc(localValue)}" required></label><label>Note<input name="note" value="\${esc(ev ? ev.kind + " · Check official details before heading out." : "")}" placeholder="Charge phone. Water. Snacks." maxlength="200"></label><button class="btn primary">Download calendar reminder</button><p class="small muted">Open the .ics file in Google Calendar, Apple Calendar, or Outlook to add the reminder.</p></form>\`,
+    `<div class="modal-header"><h2>Plan a little outing</h2></div><form class="stack" id="calendar-form"><label>Event name<input name="name" value="${esc(ev?.title || "Pokémon adventure")}" required maxlength="100"></label><label>Date and time<input name="time" type="datetime-local" value="${esc(localValue)}" required></label><label>Note<input name="note" value="${esc(ev ? ev.kind + " · Check official details before heading out." : "")}" placeholder="Charge phone. Water. Snacks." maxlength="200"></label><button class="btn primary">Download calendar reminder</button><p class="small muted">Open the .ics file in Google Calendar, Apple Calendar, or Outlook to add the reminder.</p></form>`,
     true,
   );
 }
 function csvModal() {
   modal(
-    \`<div class="modal-header"><h2>Bring your GO list</h2></div><p class="muted small">CSV is staying. Import your own file with columns: name, shiny, lucky, count. Use true or false for flags, then preview before saving.</p><div class="row space">\${button("Download CSV template", "csv-template")}\${button("Use bulk picker instead", "bulk-open", true, "plus")}</div><label class="space">Choose CSV<input type="file" id="go-csv" accept=".csv,text/csv"></label><div id="csv-preview" class="space"></div>\`,
+    `<div class="modal-header"><h2>Bring your GO list</h2></div><p class="muted small">CSV is staying. Import your own file with columns: name, shiny, lucky, count. Use true or false for flags, then preview before saving.</p><div class="row space">${button("Download CSV template", "csv-template")}${button("Use bulk picker instead", "bulk-open", true, "plus")}</div><label class="space">Choose CSV<input type="file" id="go-csv" accept=".csv,text/csv"></label><div id="csv-preview" class="space"></div>`,
   );
 }
 
@@ -1028,14 +1028,14 @@ function bulkRows() {
     .slice(0, 100)
     .map((p) => {
       const picked = bulkSelected.get(p.id);
-      return \`<div class="bulk-row \${picked ? "selected" : ""}">
-        <input type="checkbox" data-bulk-id="\${p.id}" aria-label="Select \${title(p.name)}" \${picked ? "checked" : ""}>
-        <img src="\${artwork(p.id, !!picked?.shiny)}" alt="" loading="lazy">
-        <div class="bulk-name"><strong>\${title(p.name)}</strong><span>#\${String(p.id).padStart(4, "0")} · \${regions[p.gen]} · \${p.types.map(title).join(" / ")}</span></div>
-        <label class="bulk-flag"><input type="checkbox" data-bulk-shiny="\${p.id}" \${picked?.shiny ? "checked" : ""}>Shiny</label>
-        <label class="bulk-flag"><input type="checkbox" data-bulk-lucky="\${p.id}" \${picked?.lucky ? "checked" : ""}>Lucky</label>
-        <label class="bulk-count">Qty<input type="number" min="1" max="999" value="\${picked?.count || 1}" data-bulk-count="\${p.id}"></label>
-      </div>\`;
+      return `<div class="bulk-row ${picked ? "selected" : ""}">
+        <input type="checkbox" data-bulk-id="${p.id}" aria-label="Select ${title(p.name)}" ${picked ? "checked" : ""}>
+        <img src="${artwork(p.id, !!picked?.shiny)}" alt="" loading="lazy">
+        <div class="bulk-name"><strong>${title(p.name)}</strong><span>#${String(p.id).padStart(4, "0")} · ${regions[p.gen]} · ${p.types.map(title).join(" / ")}</span></div>
+        <label class="bulk-flag"><input type="checkbox" data-bulk-shiny="${p.id}" ${picked?.shiny ? "checked" : ""}>Shiny</label>
+        <label class="bulk-flag"><input type="checkbox" data-bulk-lucky="${p.id}" ${picked?.lucky ? "checked" : ""}>Lucky</label>
+        <label class="bulk-count">Qty<input type="number" min="1" max="999" value="${picked?.count || 1}" data-bulk-count="${p.id}"></label>
+      </div>`;
     })
     .join("");
 }
@@ -1053,14 +1053,14 @@ function bulkPicker(reset = true) {
   }
   const regionOptions = regions
     .slice(1)
-    .map((r, i) => \`<option value="\${i + 1}" \${+bulkGen === i + 1 ? "selected" : ""}>\${r}</option>\`)
+    .map((r, i) => `<option value="${i + 1}" ${+bulkGen === i + 1 ? "selected" : ""}>${r}</option>`)
     .join("");
   modal(
-    \`<div class="modal-header"><div><div class="eyebrow">GO BOX BUILDER</div><h2>Bulk add Pokémon</h2></div><span class="pill" id="bulk-summary">\${bulkSelected.size} selected</span></div>
+    `<div class="modal-header"><div><div class="eyebrow">GO BOX BUILDER</div><h2>Bulk add Pokémon</h2></div><span class="pill" id="bulk-summary">${bulkSelected.size} selected</span></div>
     <p class="muted small">Tick as many as you like. Shiny, Lucky and quantity can be set per species before saving.</p>
-    <div class="filters space"><label class="search">\${icon("search")}<input id="bulk-search" value="\${esc(bulkQuery)}" placeholder="Search name or Pokédex number…"></label><select id="bulk-region"><option value="">All regions</option>\${regionOptions}</select></div>
-    <div id="bulk-results" class="bulk-list">\${bulkRows()}</div>
-    <div class="sticky-actions"><span class="small muted">Your CSV importer remains available in GO companion.</span><div class="row">\${button("Clear", "bulk-clear")}\${button("Add selected to GO", "bulk-confirm", true, "plus")}</div></div>\`,
+    <div class="filters space"><label class="search">${icon("search")}<input id="bulk-search" value="${esc(bulkQuery)}" placeholder="Search name or Pokédex number…"></label><select id="bulk-region"><option value="">All regions</option>${regionOptions}</select></div>
+    <div id="bulk-results" class="bulk-list">${bulkRows()}</div>
+    <div class="sticky-actions"><span class="small muted">Your CSV importer remains available in GO companion.</span><div class="row">${button("Clear", "bulk-clear")}${button("Add selected to GO", "bulk-confirm", true, "plus")}</div></div>`,
   );
 }
 
@@ -1108,19 +1108,19 @@ function battleModal() {
     ? title(sim.winner.name) + " has the sandbox edge"
     : "The sandbox calls it even";
   modal(
-    \`<div class="modal-header"><div><div class="eyebrow">BATTLE LAB</div><h2>1v1 sandbox</h2></div></div>
+    `<div class="modal-header"><div><div class="eyebrow">BATTLE LAB</div><h2>1v1 sandbox</h2></div></div>
     <p class="note"><strong>Strategy sandbox, not a battle oracle.</strong> This uses main-series base stats, Speed and type effectiveness only. Moves, levels, IVs, abilities, shields, energy, weather and Pokémon GO battle tuning are not modelled.</p>
     <div class="versus-grid space">
-      <button class="sim-pick" data-action="battle-choose-a"><img src="\${artwork(a.id)}" alt=""><span>\${title(a.name)}</span><small>\${a.types.map(title).join(" / ")}</small></button>
+      <button class="sim-pick" data-action="battle-choose-a"><img src="${artwork(a.id)}" alt=""><span>${title(a.name)}</span><small>${a.types.map(title).join(" / ")}</small></button>
       <div class="versus-mark">VS</div>
-      <button class="sim-pick" data-action="battle-choose-b"><img src="\${artwork(b.id)}" alt=""><span>\${title(b.name)}</span><small>\${b.types.map(title).join(" / ")}</small></button>
+      <button class="sim-pick" data-action="battle-choose-b"><img src="${artwork(b.id)}" alt=""><span>${title(b.name)}</span><small>${b.types.map(title).join(" / ")}</small></button>
     </div>
     <section class="sim-result">
-      <div class="row between"><strong>\${verdict}</strong><span class="pill">\${sim.log.length} exchanges</span></div>
-      <div class="battle-hp space"><div><span>\${title(a.name)} · \${sim.hpA}%</span><div class="progress"><i style="width:\${sim.hpA}%"></i></div></div><div><span>\${title(b.name)} · \${sim.hpB}%</span><div class="progress"><i style="width:\${sim.hpB}%"></i></div></div></div>
-      <div class="battle-log">\${latest.map((x) => \`<p><strong>R\${x.round}</strong> · \${x.attacker} deals \${x.damage} sandbox damage\${x.edge > 1 ? " · super effective ×" + x.edge : x.edge < 1 ? " · resisted ×" + x.edge : ""}</p>\`).join("")}</div>
+      <div class="row between"><strong>${verdict}</strong><span class="pill">${sim.log.length} exchanges</span></div>
+      <div class="battle-hp space"><div><span>${title(a.name)} · ${sim.hpA}%</span><div class="progress"><i style="width:${sim.hpA}%"></i></div></div><div><span>${title(b.name)} · ${sim.hpB}%</span><div class="progress"><i style="width:${sim.hpB}%"></i></div></div></div>
+      <div class="battle-log">${latest.map((x) => `<p><strong>R${x.round}</strong> · ${x.attacker} deals ${x.damage} sandbox damage${x.edge > 1 ? " · super effective ×" + x.edge : x.edge < 1 ? " · resisted ×" + x.edge : ""}</p>`).join("")}</div>
     </section>
-    <div class="row space">\${button("Swap sides", "battle-swap")}\${button("Run again", "battle-sim", true, "bolt")}</div>\`,
+    <div class="row space">${button("Swap sides", "battle-swap")}${button("Run again", "battle-sim", true, "bolt")}</div>`,
   );
 }
 function raidReadiness(boss, tier, players) {
@@ -1148,19 +1148,19 @@ function raidModal() {
     .sort((a, b) => b.m - a.m)
     .slice(0, 6);
   modal(
-    \`<div class="modal-header"><div><div class="eyebrow">RAID LAB</div><h2>Raid readiness simulator</h2></div></div>
+    `<div class="modal-header"><div><div class="eyebrow">RAID LAB</div><h2>Raid readiness simulator</h2></div></div>
     <p class="note"><strong>Planning index, not an exact win prediction.</strong> Dexterous is using your Team Builder squad, base stats and type matchups. Live GO movesets, CP, IVs, friendship boosts, weather, dodging and raid-boss tuning are outside this sandbox.</p>
-    <div class="raid-boss space"><button class="sim-pick" data-action="raid-choose"><img src="\${artwork(boss.id)}" alt=""><span>\${title(boss.name)}</span><small>Tap to change boss</small></button><div><div class="types">\${boss.types.map((t) => \`<span class="type \${t}">\${t}</span>\`).join("")}</div><h3 class="space">Counter types</h3><div class="types">\${counters.map((x) => \`<span class="type \${x.t}">\${title(x.t)} ×\${x.m}</span>\`).join("") || '<span class="muted">No super-effective single type found.</span>'}</div></div></div>
+    <div class="raid-boss space"><button class="sim-pick" data-action="raid-choose"><img src="${artwork(boss.id)}" alt=""><span>${title(boss.name)}</span><small>Tap to change boss</small></button><div><div class="types">${boss.types.map((t) => `<span class="type ${t}">${t}</span>`).join("")}</div><h3 class="space">Counter types</h3><div class="types">${counters.map((x) => `<span class="type ${x.t}">${title(x.t)} ×${x.m}</span>`).join("") || '<span class="muted">No super-effective single type found.</span>'}</div></div></div>
     <form id="raid-sim-form" class="form-grid space">
-      <label>Raid tier<select name="tier"><option value="1" \${raidState.tier === "1" ? "selected" : ""}>Tier 1</option><option value="3" \${raidState.tier === "3" ? "selected" : ""}>Tier 3</option><option value="5" \${raidState.tier === "5" ? "selected" : ""}>Tier 5</option><option value="mega" \${raidState.tier === "mega" ? "selected" : ""}>Mega / Super Mega</option></select></label>
-      <label>Estimated trainers<input name="players" type="number" min="1" max="20" value="\${raidState.players}"></label>
+      <label>Raid tier<select name="tier"><option value="1" ${raidState.tier === "1" ? "selected" : ""}>Tier 1</option><option value="3" ${raidState.tier === "3" ? "selected" : ""}>Tier 3</option><option value="5" ${raidState.tier === "5" ? "selected" : ""}>Tier 5</option><option value="mega" ${raidState.tier === "mega" ? "selected" : ""}>Mega / Super Mega</option></select></label>
+      <label>Estimated trainers<input name="players" type="number" min="1" max="20" value="${raidState.players}"></label>
       <button class="btn primary full">Recalculate</button>
     </form>
     <section class="sim-result">
-      <div class="row between"><div><span class="eyebrow">READINESS INDEX</span><h2>\${result.index}%</h2></div><span class="pill">\${result.label}</span></div>
-      <div class="progress raid-meter"><i style="width:\${Math.min(100, result.index)}%"></i></div>
-      <p class="small muted space">\${result.squad.length ? "Using your current team of " + result.squad.map((p) => title(p.name)).join(", ") + "." : "Your Team Builder is empty. Add up to six Pokémon first for a meaningful score."}</p>
-    </section>\`,
+      <div class="row between"><div><span class="eyebrow">READINESS INDEX</span><h2>${result.index}%</h2></div><span class="pill">${result.label}</span></div>
+      <div class="progress raid-meter"><i style="width:${Math.min(100, result.index)}%"></i></div>
+      <p class="small muted space">${result.squad.length ? "Using your current team of " + result.squad.map((p) => title(p.name)).join(", ") + "." : "Your Team Builder is empty. Add up to six Pokémon first for a meaningful score."}</p>
+    </section>`,
   );
 }
 
