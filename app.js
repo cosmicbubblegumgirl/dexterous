@@ -144,7 +144,6 @@ function shell() {
   const asideNote = document.querySelector(".aside-note");
   if (asideNote)
     asideNote.innerHTML = `<strong>Take the scenic route.</strong><p>Meet a new favourite, check its region, or leave yourself a field note.</p>${button("Surprise me", "surprise", false, "shuffle")}`;
-  document.querySelector(".assistant-toggle")?.remove();
 }
 function heading(eyebrow, h, p = "", extra = "") {
   return `<div class="heading"><div><div class="eyebrow">${eyebrow}</div><h1 style="margin-top:8px">${h}</h1>${p ? `<p>${p}</p>` : ""}</div>${extra}</div>`;
